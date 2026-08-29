@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/native-select';
 import { Slider } from '@/components/ui/slider';
 import { Textarea } from '@/components/ui/textarea';
+import { RECORD_STORAGE_KEY, type PhoneUseRecord } from '@/lib/record-data';
 
 const moods = [
   { emoji: '😌', label: 'Sakin' },
@@ -31,6 +32,18 @@ export function NewRecordForm() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const record: PhoneUseRecord = {
+      intent: String(formData.get('intent') ?? ''),
+      plannedMinutes: plannedTime,
+      previousActivity: String(formData.get('previousActivity') ?? ''),
+      mood,
+      actualActivity: String(formData.get('actualActivity') ?? ''),
+      actualMinutes: actualTime,
+      createdAt: new Date().toISOString(),
+    };
+
+    sessionStorage.setItem(RECORD_STORAGE_KEY, JSON.stringify(record));
     router.push('/analiz');
   }
 
@@ -50,17 +63,15 @@ export function NewRecordForm() {
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="intent">Telefonu neden açıyorsun?</FieldLabel>
-              <NativeSelect className="w-full">
-                <select id="intent" name="intent" required defaultValue="">
-                  <NativeSelectOption value="" disabled>
-                    Seçiniz...
-                  </NativeSelectOption>
-                  <NativeSelectOption value="mesaj">Mesajlara bakmak</NativeSelectOption>
-                  <NativeSelectOption value="sosyal-medya">Sosyal medyada gezinmek</NativeSelectOption>
-                  <NativeSelectOption value="okul">İş veya okul ile ilgili bir şeyi kontrol etmek</NativeSelectOption>
-                  <NativeSelectOption value="aliskanlik">Can sıkıntısı veya otomatik alışkanlık</NativeSelectOption>
-                  <NativeSelectOption value="diger">Diğer</NativeSelectOption>
-                </select>
+              <NativeSelect id="intent" name="intent" required defaultValue="" className="w-full">
+                <NativeSelectOption value="" disabled>
+                  Seçiniz...
+                </NativeSelectOption>
+                <NativeSelectOption value="mesaj">Mesajlara bakmak</NativeSelectOption>
+                <NativeSelectOption value="sosyal-medya">Sosyal medyada gezinmek</NativeSelectOption>
+                <NativeSelectOption value="okul">İş veya okul ile ilgili bir şeyi kontrol etmek</NativeSelectOption>
+                <NativeSelectOption value="aliskanlik">Can sıkıntısı veya otomatik alışkanlık</NativeSelectOption>
+                <NativeSelectOption value="diger">Diğer</NativeSelectOption>
               </NativeSelect>
             </Field>
 
