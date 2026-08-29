@@ -1,0 +1,113 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-public-sans);
+  --font-heading: var(--font-public-sans);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.35);
+  --radius-2xl: calc(var(--radius) * 1.75);
+  --radius-3xl: calc(var(--radius) * 2.2);
+}
+
+:root {
+  --font-public-sans: 'Public Sans', Inter, ui-sans-serif, system-ui, sans-serif;
+  --background: #f7fafd;
+  --foreground: #181c1f;
+  --card: #ffffff;
+  --card-foreground: #181c1f;
+  --popover: #ffffff;
+  --popover-foreground: #181c1f;
+  --primary: #35607f;
+  --primary-foreground: #ffffff;
+  --secondary: #c0ecda;
+  --secondary-foreground: #264e41;
+  --muted: #f1f4f7;
+  --muted-foreground: #5d666e;
+  --accent: #cae6ff;
+  --accent-foreground: #1c4b69;
+  --destructive: #ba1a1a;
+  --border: #e0e3e6;
+  --input: #c2c7ce;
+  --ring: #376282;
+  --radius: 0.75rem;
+}
+
+.dark {
+  --background: #181c1f;
+  --foreground: #eef1f4;
+  --card: #24282b;
+  --card-foreground: #eef1f4;
+  --popover: #24282b;
+  --popover-foreground: #eef1f4;
+  --primary: #a1cbef;
+  --primary-foreground: #001e30;
+  --secondary: #264e41;
+  --secondary-foreground: #c0ecda;
+  --muted: #2d3134;
+  --muted-foreground: #c2c7ce;
+  --accent: #1c4b69;
+  --accent-foreground: #cae6ff;
+  --destructive: #ffb4ab;
+  --border: #42474d;
+  --input: #72787e;
+  --ring: #a1cbef;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    @apply font-sans;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    min-width: 320px;
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+.compass-grid {
+  background-image: radial-gradient(rgb(53 96 127 / 22%) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.analysis-stripes {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 5px,
+    rgb(38 78 65 / 13%) 5px,
+    rgb(38 78 65 / 13%) 9px
+  );
+}
