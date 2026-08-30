@@ -1,6 +1,6 @@
 'use client';
 
-import type { FormEvent } from 'react';
+import type { SubmitEvent } from 'react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { BarChart3, Brain, History } from 'lucide-react';
@@ -30,15 +30,19 @@ export function NewRecordForm() {
   const [actualTime, setActualTime] = useState(30);
   const [mood, setMood] = useState<(typeof moods)[number]['label']>('Sakin');
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
+    const getTextValue = (name: string) => {
+      const value = formData.get(name);
+      return typeof value === 'string' ? value : '';
+    };
     const record: PhoneUseRecord = {
-      intent: String(formData.get('intent') ?? ''),
+      intent: getTextValue('intent'),
       plannedMinutes: plannedTime,
-      previousActivity: String(formData.get('previousActivity') ?? ''),
+      previousActivity: getTextValue('previousActivity'),
       mood,
-      actualActivity: String(formData.get('actualActivity') ?? ''),
+      actualActivity: getTextValue('actualActivity'),
       actualMinutes: actualTime,
       createdAt: new Date().toISOString(),
     };

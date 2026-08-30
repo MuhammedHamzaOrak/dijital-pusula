@@ -1,57 +1,11 @@
-import {
-  ArrowUpRight,
-  BookOpen,
-  Brain,
-  FileText,
-  Plus,
-  Smartphone,
-  TrendingUp,
-} from 'lucide-react';
+import { Brain, Plus } from 'lucide-react';
 import Link from 'next/link';
 
-import { ActivityCard } from '@/components/digital-compass/activity-card';
+import { DashboardData } from '@/components/digital-compass/dashboard-data';
 import { MobileNav } from '@/components/digital-compass/mobile-nav';
 import { SiteHeader } from '@/components/digital-compass/site-header';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-
-const activities = [
-  {
-    title: 'Ders Çalışma',
-    time: 'Bugün, 14:30',
-    status: 'Başarılı',
-    intended: '45 dk',
-    actual: '50 dk',
-    tone: 'success' as const,
-    icon: BookOpen,
-  },
-  {
-    title: 'Sosyal Medya',
-    time: 'Bugün, 12:00',
-    status: 'Aşıldı',
-    intended: '15 dk',
-    actual: '45 dk',
-    tone: 'danger' as const,
-    icon: Smartphone,
-  },
-  {
-    title: 'Makale Okuma',
-    time: 'Dün, 20:15',
-    status: 'Kısmen',
-    intended: '60 dk',
-    actual: '30 dk',
-    tone: 'neutral' as const,
-    icon: FileText,
-  },
-];
 
 export default function DashboardPage() {
   return (
@@ -85,73 +39,7 @@ export default function DashboardPage() {
           </Link>
         </section>
 
-        <section
-          className="grid gap-5 md:grid-cols-12"
-          aria-label="Haftalık özet"
-        >
-          <Card className="border-0 bg-card py-0 shadow-[0_12px_32px_rgb(55_98_130/8%)] ring-1 ring-border md:col-span-4">
-            <CardHeader className="px-6 pt-6">
-              <CardDescription className="font-medium">
-                Bu haftaki niyet dışı kullanım
-              </CardDescription>
-              <CardTitle className="mt-2 flex items-baseline gap-2">
-                <span className="text-4xl font-bold tracking-tight text-destructive">
-                  2s 45d
-                </span>
-                <span className="text-sm font-normal text-muted-foreground">/ hafta</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="mt-auto px-6 pb-6">
-              <Progress
-                aria-label="Haftalık niyet dışı kullanım oranı"
-                value={35}
-                className="[&_[data-slot=progress-indicator]]:bg-destructive [&_[data-slot=progress-track]]:h-2"
-              />
-              <p className="mt-3 flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                <TrendingUp className="size-3.5" aria-hidden="true" />
-                Geçen haftaya göre %12 artış
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="relative min-h-56 overflow-hidden border-0 bg-gradient-to-br from-[#dce8f1] via-[#edf5f7] to-[#f7fafd] py-0 shadow-[0_12px_32px_rgb(55_98_130/8%)] ring-1 ring-border md:col-span-8">
-            <div className="absolute inset-0 compass-grid opacity-55" aria-hidden="true" />
-            <CardContent className="relative flex h-full min-h-56 items-center justify-center p-8 text-center">
-              <div className="max-w-lg">
-                <span className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                  <Brain className="size-7" aria-hidden="true" />
-                </span>
-                <CardTitle className="text-2xl font-semibold text-accent-foreground">
-                  Odaklanma Puanın: İyi
-                </CardTitle>
-                <CardDescription className="mt-2 text-base leading-6">
-                  Son 3 gün içinde niyetlerine %70 sadık kaldın.
-                </CardDescription>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-
-        <section id="son-aktiviteler" aria-labelledby="activities-title">
-          <div className="mb-5 flex items-end justify-between gap-4">
-            <div>
-              <p className="text-sm font-medium text-primary">Kayıtların</p>
-              <h2 id="activities-title" className="mt-1 text-2xl font-semibold tracking-tight">
-                Son Aktiviteler
-              </h2>
-            </div>
-            <Button variant="ghost" className="text-primary">
-              Tümünü Gör
-              <ArrowUpRight data-icon="inline-end" />
-            </Button>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {activities.map((activity) => (
-              <ActivityCard key={activity.title} {...activity} />
-            ))}
-          </div>
-        </section>
+        <DashboardData />
 
         <section className="rounded-2xl border border-secondary/70 bg-secondary/35 p-5 sm:flex sm:items-center sm:justify-between sm:gap-6 sm:p-6">
           <div className="flex gap-4">

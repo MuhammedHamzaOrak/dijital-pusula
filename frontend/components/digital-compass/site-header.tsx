@@ -1,12 +1,10 @@
-import { Bell, Compass, Settings } from 'lucide-react';
+import { Compass } from 'lucide-react';
 import Link from 'next/link';
 
-import { Button } from '@/components/ui/button';
-
-const navItems = ['Ana Sayfa', 'Kayıtlar', 'İçgörüler'] as const;
+const navItems = ['Ana Sayfa', 'Yeni Kayıt', 'İçgörüler'] as const;
 const navLinks = {
   'Ana Sayfa': '/',
-  Kayıtlar: '/yeni-kayit',
+  'Yeni Kayıt': '/yeni-kayit',
   İçgörüler: '/analiz',
 } as const;
 
@@ -45,20 +43,12 @@ export function SiteHeader({ activePage }: SiteHeaderProps) {
           })}
         </nav>
 
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" aria-label="Bildirimler">
-            <Bell />
-          </Button>
-          <Button variant="ghost" size="icon" aria-label="Ayarlar">
-            <Settings />
-          </Button>
-          <span
-            className="ml-2 hidden size-8 items-center justify-center rounded-full bg-accent text-xs font-bold text-accent-foreground md:flex"
-            aria-label="Kullanıcı profili"
-          >
-            DP
-          </span>
-        </div>
+        <span
+          className="hidden size-8 items-center justify-center rounded-full bg-accent text-xs font-bold text-accent-foreground md:flex"
+          aria-label="Dijital Pusula"
+        >
+          DP
+        </span>
       </div>
     </header>
   );

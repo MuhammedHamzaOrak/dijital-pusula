@@ -5,7 +5,7 @@ import { SiteHeader } from '@/components/digital-compass/site-header';
 export default function NewRecordPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SiteHeader activePage="Kayıtlar" />
+      <SiteHeader activePage="Yeni Kayıt" />
 
       <main className="mx-auto w-full max-w-6xl px-5 py-10 pb-28 md:px-10 md:py-14 lg:px-14">
         <div className="mb-8 max-w-2xl">

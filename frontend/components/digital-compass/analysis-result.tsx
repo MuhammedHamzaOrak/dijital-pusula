@@ -9,12 +9,14 @@ import {
   LoaderCircle,
   RefreshCw,
   Sparkles,
+  TriangleAlert,
 } from 'lucide-react';
 
 import { InsightCard } from '@/components/digital-compass/insight-card';
 import { Badge } from '@/components/ui/badge';
-import { buttonVariants } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { requestAnalysis, type AnalysisResponse } from '@/lib/analysis-api';
 import { mockAnalysis } from '@/lib/mock-analysis';
 import {
   intentLabels,
@@ -34,30 +36,103 @@ const exampleRecord: PhoneUseRecord = {
   createdAt: '',
 };
 
+const demoAnalysis: AnalysisResponse = {
+  yansitma: mockAnalysis.pattern,
+  tetikleyici_analizi: mockAnalysis.possibleTrigger,
+  mini_deney: mockAnalysis.behaviorExperiment,
+};
+
+type AnalysisStatus = 'loading' | 'success' | 'error';
+
+function readStoredRecord() {
+  try {
+    const storedValue = sessionStorage.getItem(RECORD_STORAGE_KEY);
+    const parsedValue: unknown = storedValue ? JSON.parse(storedValue) : null;
+    return isPhoneUseRecord(parsedValue) ? parsedValue : null;
+  } catch {
+    return null;
+  }
+}
+
 export function AnalysisResult() {
   const [record, setRecord] = useState<PhoneUseRecord | null>(null);
-  const [isExample, setIsExample] = useState(false);
+  const [analysis, setAnalysis] = useState<AnalysisResponse | null>(null);
+  const [status, setStatus] = useState<AnalysisStatus>('loading');
+  const [isDemo, setIsDemo] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
-    let storedRecord: PhoneUseRecord | null = null;
+    const controller = new AbortController();
+    const storedRecord = readStoredRecord();
+    const selectedRecord = storedRecord ?? exampleRecord;
+    let demoTimer: number | undefined;
 
-    try {
-      const storedValue = sessionStorage.getItem(RECORD_STORAGE_KEY);
-      const parsedValue: unknown = storedValue ? JSON.parse(storedValue) : null;
-      storedRecord = isPhoneUseRecord(parsedValue) ? parsedValue : null;
-    } catch {
-      storedRecord = null;
+    async function loadAnalysis() {
+      try {
+        const result = storedRecord
+          ? await requestAnalysis(selectedRecord, controller.signal)
+          : null;
+
+        if (result) {
+          setRecord(selectedRecord);
+          setAnalysis(result);
+          setIsDemo(false);
+          setStatus('success');
+          return;
+        }
+
+        demoTimer = window.setTimeout(() => {
+          setRecord(selectedRecord);
+          setAnalysis(demoAnalysis);
+          setIsDemo(true);
+          setStatus('success');
+        }, 650);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+        setStatus('error');
+      }
     }
 
-    const timer = window.setTimeout(() => {
-      setRecord(storedRecord ?? exampleRecord);
-      setIsExample(!storedRecord);
-    }, 650);
+    void loadAnalysis();
 
-    return () => window.clearTimeout(timer);
-  }, []);
+    return () => {
+      controller.abort();
+      if (demoTimer) window.clearTimeout(demoTimer);
+    };
+  }, [retryCount]);
 
-  if (!record) {
+  if (status === 'loading' || !record || !analysis) {
+    if (status === 'error') {
+      return (
+        <div className="flex min-h-[55vh] flex-col items-center justify-center text-center" role="alert">
+          <span className="flex size-14 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
+            <TriangleAlert className="size-7" aria-hidden="true" />
+          </span>
+          <h1 className="mt-5 text-2xl font-bold tracking-tight">Analiz alınamadı</h1>
+          <p className="mt-2 max-w-md text-muted-foreground">
+            Bağlantıda kısa süreli bir sorun oluştu. Kaydın bu cihazda duruyor.
+          </p>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+            <Button
+              onClick={() => {
+                setStatus('loading');
+                setAnalysis(null);
+                setRetryCount((count) => count + 1);
+              }}
+            >
+              Tekrar Dene
+            </Button>
+            <Link
+              href="/yeni-kayit"
+              className={cn(buttonVariants({ variant: 'outline' }), 'rounded-xl')}
+            >
+              Kaydı Düzenle
+            </Link>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="flex min-h-[55vh] flex-col items-center justify-center text-center" aria-live="polite">
         <span className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
@@ -83,7 +158,7 @@ export function AnalysisResult() {
       <header>
         <div className="flex flex-wrap items-center gap-3">
           <p className="text-sm font-semibold tracking-wide text-primary">Son kaydının özeti</p>
-          {isExample && <Badge variant="outline">Örnek analiz</Badge>}
+          <Badge variant="outline">{isDemo ? 'Demo yorum' : 'AI analizi'}</Badge>
         </div>
         <h1 className="mt-2 text-3xl font-bold tracking-[-0.025em] sm:text-4xl">
           Analiz Sonucu
@@ -100,9 +175,9 @@ export function AnalysisResult() {
               <RefreshCw className="size-5" aria-hidden="true" />
             </span>
             <div>
-              <CardTitle className="text-xl font-semibold">Niyet vs. Gerçeklik</CardTitle>
+              <CardTitle className="text-xl font-semibold">Niyet ve Gerçeklik</CardTitle>
               <p className="mt-0.5 text-sm text-muted-foreground">
-                Planladığın süre ile gerçek kullanımın karşılaştırması
+                Planladığın süre ile gerçek kullanımının karşılaştırması
               </p>
             </div>
           </CardHeader>
@@ -121,11 +196,10 @@ export function AnalysisResult() {
                     Gerçek: <strong className="text-foreground">{record.actualMinutes} dk</strong>
                   </p>
                 </div>
-                <div
-                  className="flex h-4 overflow-hidden rounded-full bg-muted"
-                  role="img"
-                  aria-label={`${record.plannedMinutes} dakika planlandı, ${record.actualMinutes} dakika kullanıldı`}
-                >
+                <p className="sr-only">
+                  {record.plannedMinutes} dakika planlandı, {record.actualMinutes} dakika kullanıldı.
+                </p>
+                <div className="flex h-4 overflow-hidden rounded-full bg-muted" aria-hidden="true">
                   <div className="h-full bg-primary" style={{ width: `${plannedRatio}%` }} />
                   <div
                     className="analysis-stripes h-full bg-secondary"
@@ -175,14 +249,14 @@ export function AnalysisResult() {
         </Card>
 
         <InsightCard
-          title="Tekrarlayan Örüntü"
-          description={mockAnalysis.pattern}
+          title="Yansıtma"
+          description={analysis.yansitma}
           icon={RefreshCw}
           tone="primary"
         />
         <InsightCard
           title="Olası Tetikleyici"
-          description={mockAnalysis.possibleTrigger}
+          description={analysis.tetikleyici_analizi}
           icon={Sparkles}
           tone="secondary"
         />
@@ -194,12 +268,9 @@ export function AnalysisResult() {
               <Lightbulb className="size-6" aria-hidden="true" />
             </span>
             <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <CardTitle className="text-xl font-semibold">Küçük Davranış Deneyi</CardTitle>
-                <Badge variant="outline" className="border-primary/20 bg-background/50">Demo yorum</Badge>
-              </div>
+              <CardTitle className="text-xl font-semibold">Küçük Davranış Deneyi</CardTitle>
               <p className="mt-2 text-base leading-7 text-accent-foreground/85 sm:text-lg">
-                {mockAnalysis.behaviorExperiment}
+                {analysis.mini_deney}
               </p>
             </div>
           </CardContent>
@@ -211,7 +282,7 @@ export function AnalysisResult() {
           href="/"
           className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'h-11 rounded-xl px-5')}
         >
-          Dashboard’a Dön
+          Ana Sayfaya Dön
         </Link>
         <Link
           href="/yeni-kayit"
