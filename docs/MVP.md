@@ -78,3 +78,86 @@ Kullanıcının telefon kullanım niyeti ile gerçekleşen davranışı arasınd
 - API anahtarı Git deposuna veya frontend'e taşınmamalıdır.
 - Frontend üretim derlemesi ve backend sağlık kontrolü başarılı olmalıdır.
 
+---
+
+# English Version
+
+# Digital Compass — MVP Scope
+
+## MVP Goal
+
+Make the gap between a user's phone usage intention and actual behavior visible through a short record flow, then provide an empathetic and actionable AI insight about that difference.
+
+## Features Included in the MVP
+
+- Home, new record, and insights screens
+- Empty states for first-time use
+- Form-based collection of intended and actual usage information
+- Comparison of planned and actual duration
+- Latest record summary and intention adherence ratio
+- Gemini analysis through FastAPI
+- Fallback model support when the primary model is unavailable
+- Structured three-card AI result
+- Loading, service busy, general error, and retry states
+- Browser-session storage for the latest record and analysis
+- Local, Git-excluded backend storage for successful analyses
+
+## Core Flow
+
+1. The user opens the **New Record** screen.
+2. The user enters intention, duration, previous activity, mood, and actual usage information.
+3. The user selects **Analyze**.
+4. The frontend stores the record in the session and sends a `POST /api/analyze` request.
+5. The backend validates the input and receives a three-field JSON response from Gemini.
+6. The insights screen displays the duration difference and AI results.
+7. If the same record is reopened, the analysis stored in the session is reused.
+
+## Required User Inputs
+
+- Intention (`intent`)
+- Planned duration (`plannedMinutes`)
+- Activity before using the phone (`previousActivity`)
+- Mood (`mood`)
+- Actual activity (`actualActivity`)
+- Actual usage duration (`actualMinutes`)
+
+The `createdAt` field is generated automatically by the system rather than entered by the user.
+
+## AI Outputs
+
+- `yansitma`: An empathetic reflection on the gap between intention and actual usage
+- `tetikleyici_analizi`: An explanation of a possible trigger based on the user's context
+- `mini_deney`: A small behavioral suggestion for a similar future situation
+
+## Features Not Included in the MVP
+
+- Registration, sign-in, and user profiles
+- Persistent database and multi-record history
+- Cross-device synchronization
+- Automatic collection of screen time or application usage data
+- Notifications and reminders
+- Long-term statistics and advanced reporting
+- Social features or expert consultation
+- Completed production deployment
+
+## Potential Future Features
+
+- User accounts and secure cloud synchronization
+- Date-based history, filtering, and trend charts
+- Goals, reminders, and customizable behavioral experiments
+- Automatic records based on permission-based device usage data
+- Data deletion, export, and detailed privacy controls
+- Expanded accessibility and multilingual support
+- Centralized monitoring and rate limiting in production
+
+## MVP Completion Criteria
+
+- The user can create a new record using all required fields.
+- The frontend and backend communicate through the defined API contract.
+- A real Gemini request returns all three required AI fields.
+- The result screen displays both the duration comparison and the three AI outputs.
+- When no record exists, an empty state is displayed instead of demo data.
+- The analysis for the same record can be reopened within the session without another API request.
+- During service availability or general errors, the record is preserved and retry is available.
+- The API key is not moved into the repository or frontend.
+- The frontend production build and backend health check succeed.
