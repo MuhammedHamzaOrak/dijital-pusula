@@ -1,8 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from google import genai
+from google.genai import errors, types
 from pydantic import BaseModel
-import google.generativeai as genai
 import json
+import logging
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -11,6 +13,8 @@ BACKEND_DIR = Path(__file__).resolve().parent
 DATA_FILE = BACKEND_DIR / "kayitlar.local.json"
 
 load_dotenv(dotenv_path=BACKEND_DIR / ".env")
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
@@ -31,8 +35,9 @@ app.add_middleware(
 
 # Gemini API Bağlantısı
 api_key = os.getenv("GEMINI_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
+gemini_model = os.getenv("GEMINI_MODEL", "gemini-3.7-flash")
+gemini_fallback_model = os.getenv("GEMINI_FALLBACK_MODEL", "gemini-2.5-flash")
+client = genai.Client(api_key=api_key) if api_key else None
 
 system_prompt = """
 SENİN ROLÜN VE AMACIN:
@@ -64,12 +69,6 @@ JSON objesi dışında HİÇBİR selamlama, açıklama, ön söz, son söz veya 
 JSON objesi sadece ve kesinlikle şu 3 anahtarı içermelidir: "yansitma", "tetikleyici_analizi", "mini_deney".
 """
 
-model = genai.GenerativeModel(
-    'gemini-1.5-flash',
-    system_instruction=system_prompt,
-    generation_config={"response_mime_type": "application/json"}
-)
-
 # FRONTEND'İN GÖNDERECEĞİ İNGİLİZCE İSİMLİ VERİ FORMATI
 class İstekVerisi(BaseModel):
     intent: str
@@ -80,14 +79,25 @@ class İstekVerisi(BaseModel):
     actualMinutes: int
     createdAt: str
 
+
+class AnalizYaniti(BaseModel):
+    yansitma: str
+    tetikleyici_analizi: str
+    mini_deney: str
+
 @app.get("/health")
 def health_check():
-    return {"status": "ok", "geminiConfigured": bool(api_key)}
+    return {
+        "status": "ok",
+        "geminiConfigured": bool(api_key),
+        "model": gemini_model,
+        "fallbackModel": gemini_fallback_model,
+    }
 
 
 @app.post("/api/analyze")
 def analyze_activity(data: İstekVerisi):
-    if not api_key:
+    if client is None:
         raise HTTPException(
             status_code=503,
             detail="GEMINI_API_KEY henüz yapılandırılmadı.",
@@ -109,9 +119,35 @@ def analyze_activity(data: İstekVerisi):
     )
 
     try:
-        response = model.generate_content(user_prompt)
-        ai_result = json.loads(response.text)
+        generate_config = types.GenerateContentConfig(
+            system_instruction=system_prompt,
+            response_mime_type="application/json",
+            response_json_schema=AnalizYaniti.model_json_schema(),
+        )
+
+        try:
+            response = client.models.generate_content(
+                model=gemini_model,
+                contents=user_prompt,
+                config=generate_config,
+            )
+        except errors.ServerError as exc:
+            if exc.code != 503 or gemini_fallback_model == gemini_model:
+                raise
+
+            logger.warning(
+                "Gemini ana modeli yogun; yedek model deneniyor: %s",
+                gemini_fallback_model,
+            )
+            response = client.models.generate_content(
+                model=gemini_fallback_model,
+                contents=user_prompt,
+                config=generate_config,
+            )
+
+        ai_result = AnalizYaniti.model_validate_json(response.text).model_dump()
     except Exception:
+        logger.exception("Gemini analiz istegi basarisiz oldu")
         # Frontend'in istediği 502 hata fırlatma kuralı
         raise HTTPException(
             status_code=502,
