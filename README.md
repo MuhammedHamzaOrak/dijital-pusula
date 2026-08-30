@@ -1,4 +1,4 @@
-[Screencast from 2026-08-30 19-37-46.webm](https://github.com/user-attachments/assets/2ca34cb2-324e-40f1-991a-1a47e3cadc8d)
+[Demo](https://github.com/user-attachments/assets/2ca34cb2-324e-40f1-991a-1a47e3cadc8d)
 # Dijital Pusula
 
 Dijital alışkanlıklarda kullanıcının niyeti ile gerçekleşen davranışı karşılaştıran farkındalık uygulaması.
