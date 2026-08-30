@@ -6,7 +6,17 @@ export type AnalysisResponse = {
   mini_deney: string;
 };
 
-function isAnalysisResponse(value: unknown): value is AnalysisResponse {
+export class AnalysisApiError extends Error {
+  constructor(
+    public readonly status: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'AnalysisApiError';
+  }
+}
+
+export function isAnalysisResponse(value: unknown): value is AnalysisResponse {
   if (!value || typeof value !== 'object') return false;
 
   const response = value as Partial<AnalysisResponse>;
@@ -34,10 +44,12 @@ function normalizeResponse(value: unknown): unknown {
 export async function requestAnalysis(
   record: PhoneUseRecord,
   signal?: AbortSignal,
-): Promise<AnalysisResponse | null> {
+): Promise<AnalysisResponse> {
   const apiUrl = process.env.NEXT_PUBLIC_ANALYZE_API_URL?.trim();
 
-  if (!apiUrl) return null;
+  if (!apiUrl) {
+    throw new AnalysisApiError(0, 'Analiz servisi adresi yapılandırılmadı.');
+  }
 
   const response = await fetch(apiUrl, {
     method: 'POST',
@@ -47,7 +59,22 @@ export async function requestAnalysis(
   });
 
   if (!response.ok) {
-    throw new Error(`Analiz isteği başarısız oldu (${response.status}).`);
+    let message = `Analiz isteği başarısız oldu (${response.status}).`;
+
+    try {
+      const errorPayload: unknown = await response.json();
+      if (
+        errorPayload &&
+        typeof errorPayload === 'object' &&
+        typeof (errorPayload as { detail?: unknown }).detail === 'string'
+      ) {
+        message = (errorPayload as { detail: string }).detail;
+      }
+    } catch {
+      // Sunucu JSON hata gövdesi döndürmediyse durum kodunu kullan.
+    }
+
+    throw new AnalysisApiError(response.status, message);
   }
 
   const payload: unknown = await response.json();

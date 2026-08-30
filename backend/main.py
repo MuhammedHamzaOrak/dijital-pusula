@@ -35,8 +35,8 @@ app.add_middleware(
 
 # Gemini API Bağlantısı
 api_key = os.getenv("GEMINI_API_KEY")
-gemini_model = os.getenv("GEMINI_MODEL", "gemini-3.7-flash")
-gemini_fallback_model = os.getenv("GEMINI_FALLBACK_MODEL", "gemini-2.5-flash")
+gemini_model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+gemini_fallback_model = os.getenv("GEMINI_FALLBACK_MODEL", "gemini-2.5-flash-lite")
 client = genai.Client(api_key=api_key) if api_key else None
 
 system_prompt = """
@@ -131,12 +131,13 @@ def analyze_activity(data: İstekVerisi):
                 contents=user_prompt,
                 config=generate_config,
             )
-        except errors.ServerError as exc:
-            if exc.code != 503 or gemini_fallback_model == gemini_model:
+        except errors.APIError as exc:
+            if exc.code not in {429, 503} or gemini_fallback_model == gemini_model:
                 raise
 
             logger.warning(
-                "Gemini ana modeli yogun; yedek model deneniyor: %s",
+                "Gemini ana modeli kullanilamiyor (%s); yedek model deneniyor: %s",
+                exc.code,
                 gemini_fallback_model,
             )
             response = client.models.generate_content(
@@ -146,6 +147,17 @@ def analyze_activity(data: İstekVerisi):
             )
 
         ai_result = AnalizYaniti.model_validate_json(response.text).model_dump()
+    except errors.APIError as exc:
+        logger.exception("Gemini analiz istegi basarisiz oldu")
+        if exc.code in {429, 503}:
+            raise HTTPException(
+                status_code=503,
+                detail="AI servisi su an yogun. Lutfen kisa bir sure sonra tekrar deneyin.",
+            )
+        raise HTTPException(
+            status_code=502,
+            detail="AI servisine ulasilamadi veya gecersiz yanit alindi.",
+        )
     except Exception:
         logger.exception("Gemini analiz istegi basarisiz oldu")
         # Frontend'in istediği 502 hata fırlatma kuralı

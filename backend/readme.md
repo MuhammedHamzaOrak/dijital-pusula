@@ -1,6 +1,6 @@
 # Dijital Pusula - Backend
 
-Bu klasör, frontend'den gelen kullanım kaydını Gemini 3.7 Flash ile analiz edip üç kartlık JSON yanıtı döndüren FastAPI servisini içerir. Desteklenen güncel `google-genai` Python paketi kullanılır.
+Bu klasör, frontend'den gelen kullanım kaydını Gemini 2.5 Flash ile analiz edip üç kartlık JSON yanıtı döndüren FastAPI servisini içerir. Desteklenen güncel `google-genai` Python paketi kullanılır.
 
 ## Kurulum
 
@@ -20,8 +20,8 @@ Bu klasör, frontend'den gelen kullanım kaydını Gemini 3.7 Flash ile analiz e
 
    ```env
    GEMINI_API_KEY=gemini_anahtariniz
-   GEMINI_MODEL=gemini-3.7-flash
-   GEMINI_FALLBACK_MODEL=gemini-2.5-flash
+   GEMINI_MODEL=gemini-2.5-flash
+   GEMINI_FALLBACK_MODEL=gemini-2.5-flash-lite
    FRONTEND_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
    ```
 

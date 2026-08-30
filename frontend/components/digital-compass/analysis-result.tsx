@@ -16,8 +16,12 @@ import { InsightCard } from '@/components/digital-compass/insight-card';
 import { Badge } from '@/components/ui/badge';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { requestAnalysis, type AnalysisResponse } from '@/lib/analysis-api';
-import { mockAnalysis } from '@/lib/mock-analysis';
+import {
+  AnalysisApiError,
+  isAnalysisResponse,
+  requestAnalysis,
+  type AnalysisResponse,
+} from '@/lib/analysis-api';
 import {
   intentLabels,
   isPhoneUseRecord,
@@ -26,23 +30,61 @@ import {
 } from '@/lib/record-data';
 import { cn } from '@/lib/utils';
 
-const exampleRecord: PhoneUseRecord = {
-  intent: 'okul',
-  plannedMinutes: mockAnalysis.plannedMinutes,
-  previousActivity: 'Ders çalışıyordum',
-  mood: 'Yorgun',
-  actualActivity: 'Araştırmadan sonra sosyal medyada gezindim',
-  actualMinutes: mockAnalysis.actualMinutes,
-  createdAt: '',
+type AnalysisStatus = 'loading' | 'empty' | 'success' | 'busy' | 'error';
+
+const ANALYSIS_STORAGE_KEY = 'dijital-pusula:last-analysis';
+const inFlightAnalysisRequests = new Map<string, Promise<AnalysisResponse>>();
+
+type StoredAnalysis = {
+  recordKey: string;
+  analysis: AnalysisResponse;
 };
 
-const demoAnalysis: AnalysisResponse = {
-  yansitma: mockAnalysis.pattern,
-  tetikleyici_analizi: mockAnalysis.possibleTrigger,
-  mini_deney: mockAnalysis.behaviorExperiment,
-};
+function getRecordKey(record: PhoneUseRecord) {
+  return JSON.stringify(record);
+}
 
-type AnalysisStatus = 'loading' | 'success' | 'error';
+function readStoredAnalysis(record: PhoneUseRecord) {
+  try {
+    const storedValue = sessionStorage.getItem(ANALYSIS_STORAGE_KEY);
+    const parsedValue: unknown = storedValue ? JSON.parse(storedValue) : null;
+
+    if (!parsedValue || typeof parsedValue !== 'object') return null;
+
+    const storedAnalysis = parsedValue as Partial<StoredAnalysis>;
+    return storedAnalysis.recordKey === getRecordKey(record) &&
+      isAnalysisResponse(storedAnalysis.analysis)
+      ? storedAnalysis.analysis
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function storeAnalysis(record: PhoneUseRecord, analysis: AnalysisResponse) {
+  try {
+    const value: StoredAnalysis = {
+      recordKey: getRecordKey(record),
+      analysis,
+    };
+    sessionStorage.setItem(ANALYSIS_STORAGE_KEY, JSON.stringify(value));
+  } catch {
+    // Tarayıcı depolaması kapalıysa analiz yine ekranda gösterilir.
+  }
+}
+
+function requestAnalysisOnce(record: PhoneUseRecord) {
+  const recordKey = getRecordKey(record);
+  const existingRequest = inFlightAnalysisRequests.get(recordKey);
+
+  if (existingRequest) return existingRequest;
+
+  const request = requestAnalysis(record).finally(() => {
+    inFlightAnalysisRequests.delete(recordKey);
+  });
+  inFlightAnalysisRequests.set(recordKey, request);
+  return request;
+}
 
 function readStoredRecord() {
   try {
@@ -58,59 +100,92 @@ export function AnalysisResult() {
   const [record, setRecord] = useState<PhoneUseRecord | null>(null);
   const [analysis, setAnalysis] = useState<AnalysisResponse | null>(null);
   const [status, setStatus] = useState<AnalysisStatus>('loading');
-  const [isDemo, setIsDemo] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
-    const controller = new AbortController();
+    let isCancelled = false;
     const storedRecord = readStoredRecord();
-    const selectedRecord = storedRecord ?? exampleRecord;
-    let demoTimer: number | undefined;
+
+    if (!storedRecord) {
+      setRecord(null);
+      setAnalysis(null);
+      setStatus('empty');
+      return;
+    }
+
+    const storedAnalysis = readStoredAnalysis(storedRecord);
+    if (storedAnalysis) {
+      setRecord(storedRecord);
+      setAnalysis(storedAnalysis);
+      setStatus('success');
+      return;
+    }
 
     async function loadAnalysis() {
       try {
-        const result = storedRecord
-          ? await requestAnalysis(selectedRecord, controller.signal)
-          : null;
+        const result = await requestAnalysisOnce(storedRecord);
+        storeAnalysis(storedRecord, result);
+        if (isCancelled) return;
 
-        if (result) {
-          setRecord(selectedRecord);
-          setAnalysis(result);
-          setIsDemo(false);
-          setStatus('success');
-          return;
-        }
-
-        demoTimer = window.setTimeout(() => {
-          setRecord(selectedRecord);
-          setAnalysis(demoAnalysis);
-          setIsDemo(true);
-          setStatus('success');
-        }, 650);
+        setRecord(storedRecord);
+        setAnalysis(result);
+        setStatus('success');
       } catch (error) {
-        if (error instanceof DOMException && error.name === 'AbortError') return;
-        setStatus('error');
+        if (isCancelled) return;
+        setStatus(
+          error instanceof AnalysisApiError && [429, 503].includes(error.status)
+            ? 'busy'
+            : 'error',
+        );
       }
     }
 
     void loadAnalysis();
 
     return () => {
-      controller.abort();
-      if (demoTimer) window.clearTimeout(demoTimer);
+      isCancelled = true;
     };
   }, [retryCount]);
 
+  if (status === 'empty') {
+    return (
+      <Card className="border-0 bg-card py-0 shadow-[0_12px_32px_rgb(55_98_130/8%)] ring-1 ring-border">
+        <CardContent className="flex min-h-[55vh] flex-col items-center justify-center p-8 text-center">
+          <span className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Sparkles className="size-7" aria-hidden="true" />
+          </span>
+          <CardTitle className="mt-5 text-2xl font-semibold">Henüz bir içgörün yok</CardTitle>
+          <p className="mt-2 max-w-md text-base leading-6 text-muted-foreground">
+            İlk kaydını oluşturduğunda niyetin ve gerçek kullanımın burada analiz edilecek.
+          </p>
+          <Link
+            href="/yeni-kayit"
+            className={cn(buttonVariants({ size: 'lg' }), 'mt-6 h-11 rounded-xl px-5')}
+          >
+            İlk Kaydı Oluştur
+            <ArrowRight data-icon="inline-end" />
+          </Link>
+        </CardContent>
+      </Card>
+    );
+  }
+
   if (status === 'loading' || !record || !analysis) {
-    if (status === 'error') {
+    if (status === 'error' || status === 'busy') {
+      const isBusy = status === 'busy';
+
       return (
         <div className="flex min-h-[55vh] flex-col items-center justify-center text-center" role="alert">
           <span className="flex size-14 items-center justify-center rounded-2xl bg-destructive/10 text-destructive">
             <TriangleAlert className="size-7" aria-hidden="true" />
           </span>
-          <h1 className="mt-5 text-2xl font-bold tracking-tight">Analiz alınamadı</h1>
+          <h1 className="mt-5 text-2xl font-bold tracking-tight">
+            {isBusy ? 'AI servisi şu an yoğun' : 'Analiz alınamadı'}
+          </h1>
           <p className="mt-2 max-w-md text-muted-foreground">
-            Bağlantıda kısa süreli bir sorun oluştu. Kaydın bu cihazda duruyor.
+            {isBusy
+              ? 'Kısa bir süre bekleyip tekrar deneyebilirsin. Kaydın bu cihazda duruyor.'
+              : 'Bağlantıda kısa süreli bir sorun oluştu. Kaydın bu cihazda duruyor.'}
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Button
@@ -158,7 +233,7 @@ export function AnalysisResult() {
       <header>
         <div className="flex flex-wrap items-center gap-3">
           <p className="text-sm font-semibold tracking-wide text-primary">Son kaydının özeti</p>
-          <Badge variant="outline">{isDemo ? 'Demo yorum' : 'AI analizi'}</Badge>
+          <Badge variant="outline">AI analizi</Badge>
         </div>
         <h1 className="mt-2 text-3xl font-bold tracking-[-0.025em] sm:text-4xl">
           Analiz Sonucu

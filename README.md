@@ -5,7 +5,18 @@ Dijital alışkanlıklarda kullanıcının niyeti ile gerçekleşen davranışı
 ## Proje yapısı
 
 - `frontend/`: Vinext ve React ile hazırlanan kullanıcı arayüzü
-- `feature/frontend`: Güncel frontend geliştirme dalı
+- `backend/`: FastAPI ve Gemini ile çalışan analiz servisi
+
+## Backend'i çalıştırma
+
+```bash
+cd backend
+python -m venv .venv
+.venv\Scripts\python -m pip install -r requirements.txt
+.venv\Scripts\python -m uvicorn main:app --reload
+```
+
+Önce `.env.example` dosyasını `.env` adıyla kopyalayın ve kendi `GEMINI_API_KEY` değerinizi ekleyin. Gerçek anahtarı Git'e göndermeyin.
 
 ## Frontend'i çalıştırma
 
@@ -17,9 +28,11 @@ npm run dev
 
 Yerel adres: `http://localhost:3000`
 
+Frontend klasöründeki `.env.example` dosyasını `.env.local` adıyla kopyalayın.
+
 ## AI analiz endpoint sözleşmesi
 
-Frontend, analiz servisine `POST` isteği gönderir. Endpoint adresi frontend içindeki `.env` dosyasına eklenir:
+Frontend, analiz servisine `POST` isteği gönderir. Endpoint adresi frontend içindeki `.env.local` dosyasına eklenir:
 
 ```env
 NEXT_PUBLIC_ANALYZE_API_URL=http://localhost:8000/api/analyze
@@ -61,7 +74,7 @@ Frontend geçiş sürecinde aşağıdaki metin içine alınmış cevabı da okuy
 
 ### Hata davranışı
 
-- Eksik veya geçersiz alanlar için `400`
+- Eksik veya geçersiz alanlar için `422`
 - AI servisine ulaşılamadığında `502` veya `503`
 - Başarılı yanıtta `200` ve `Content-Type: application/json`
 - Backend farklı bir adreste çalışıyorsa frontend adresine CORS izni verilmelidir
