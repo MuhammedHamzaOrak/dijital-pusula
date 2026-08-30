@@ -1,56 +1,34 @@
 [
   {
-    "tarih": "2026-08-25",
-    "niyet": "Spotify'dan odaklanma müzik listesi açma",
-    "planlanan_sure": "5 dk",
-    "gercek_eylem": "Müzik listesini seçip ekranı kapatma",
-    "gercek_sure": "5 dk",
-    "baglam": "Sakin",
-    "durum": "Başarılı"
+    "kullanici_girisi": {
+      "intent": "Spotify'dan odaklanma müzik listesi açma",
+      "plannedMinutes": 5,
+      "previousActivity": "Ders çalışmaya hazırlanıyordum",
+      "mood": "Sakin",
+      "actualActivity": "Müzik listesini seçip ekranı kapatma",
+      "actualMinutes": 5,
+      "createdAt": "2026-08-25T14:00:00.000Z"
+    },
+    "ai_analizi": {
+      "yansitma": "Harika bir dijital niyet kontrolü! Zihninin o anki sakinliğini koruyarak planladığın gibi sadece müziği açıp ekrandan uzaklaşabilmen çok değerli.",
+      "tetikleyici_analizi": "Sakin ruh hali ve net bir hedef (ders çalışmaya hazırlık), dijital ortamda kaybolmadan sadece ihtiyacın olanı almanı sağlamış.",
+      "mini_deney": "Bir sonraki çalışmanda da telefonu biraz daha uzağa koyarak bu odaklanma halini desteklemeyi deneyebilirsin."
+    }
   },
   {
-    "tarih": "2026-08-25",
-    "niyet": "Makale okuması için sözlükten kelime çevirisine bakma",
-    "planlanan_sure": "10 dk",
-    "gercek_eylem": "Çeviri uygulamasından sonra YouTube Shorts'a dalma",
-    "gercek_sure": "55 dk",
-    "baglam": "Bunalmış",
-    "durum": "Aşıldı"
-  },
-  {
-    "tarih": "2026-08-26",
-    "niyet": "E-posta kontrolü ve staj başvurusu takibi",
-    "planlanan_sure": "15 dk",
-    "gercek_eylem": "E-postaları kontrol edip LinkedIn'de kısa süre gezinme",
-    "gercek_sure": "25 dk",
-    "baglam": "Stresli",
-    "durum": "Kısmen"
-  },
-  {
-    "tarih": "2026-08-27",
-    "niyet": "Proje grubu WhatsApp mesajlarına cevap verme",
-    "planlanan_sure": "10 dk",
-    "gercek_eylem": "WhatsApp'tan sonra X (Twitter) gündeminde kaybolma",
-    "gercek_sure": "70 dk",
-    "baglam": "Yorgun",
-    "durum": "Aşıldı"
-  },
-  {
-    "tarih": "2026-08-28",
-    "niyet": "Hava durumu ve takvim kontrolü",
-    "planlanan_sure": "5 dk",
-    "gercek_eylem": "Takvimi inceledikten sonra telefonu bırakma",
-    "gercek_sure": "4 dk",
-    "baglam": "Sakin",
-    "durum": "Başarılı"
-  },
-  {
-    "tarih": "2026-08-28",
-    "niyet": "Kısa bir mola verip arkadaşa mesaj atma",
-    "planlanan_sure": "15 dk",
-    "gercek_eylem": "Mesajlaşmanın ardından Instagram'da Reels izleme",
-    "gercek_sure": "85 dk",
-    "baglam": "Bunalmış",
-    "durum": "Aşıldı"
+    "kullanici_girisi": {
+      "intent": "Makale okuması için sözlükten kelime çevirisine bakma",
+      "plannedMinutes": 10,
+      "previousActivity": "Akademik okuma yapıyordum",
+      "mood": "Bunalmış",
+      "actualActivity": "Çeviri uygulamasından sonra YouTube Shorts'a dalma",
+      "actualMinutes": 55,
+      "createdAt": "2026-08-27T16:30:00.000Z"
+    },
+    "ai_analizi": {
+      "yansitma": "Akademik bir metnin getirdiği o bunalma hissiyle başa çıkmak için zihninin daha kolay tüketilebilir bir şeye (Shorts) yönelmesi çok insani bir mola arayışı.",
+      "tetikleyici_analizi": "Ağır bilişsel yük ve bunalma hissi, beyni hızlı dopamin ve pasif rahatlama sunan kısa videolara doğru çekmiş.",
+      "mini_deney": "Bir dahaki sefere okuma sırasında bunaldığını hissettiğinde, ekrana bakmak yerine 2 dakika gözlerini kapatıp derin nefes alarak zihnine efor gerektirmeyen bir dinlenme fırsatı verebilirsin."
+    }
   }
 ]
