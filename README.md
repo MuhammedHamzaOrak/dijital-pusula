@@ -1,4 +1,5 @@
-[Demo](https://github.com/user-attachments/assets/2ca34cb2-324e-40f1-991a-1a47e3cadc8d)
+- [Demo - English](Demo/digital-compass-demo.mp4)
+- [Demo - Turkish](https://github.com/user-attachments/assets/2ca34cb2-324e-40f1-991a-1a47e3cadc8d)
 # Dijital Pusula
 
 Dijital alışkanlıklarda kullanıcının niyeti ile gerçekleşen davranışı karşılaştıran farkındalık uygulaması.
