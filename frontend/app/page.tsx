@@ -10,22 +10,22 @@ import { cn } from '@/lib/utils';
 export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <SiteHeader activePage="Ana Sayfa" />
+      <SiteHeader activePage="Home" />
 
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-5 py-10 pb-28 md:px-10 md:py-14 lg:px-14">
         <section className="max-w-3xl space-y-5" aria-labelledby="dashboard-title">
           <p className="text-sm font-semibold tracking-wide text-primary">
-            Dijital alışkanlıklarına kısa bir bakış
+            A quick look at your digital habits
           </p>
           <h1
             id="dashboard-title"
             className="text-3xl font-bold tracking-[-0.025em] text-accent-foreground sm:text-4xl"
           >
-            Niyetinle gerçek kullanımın arasındaki farkı keşfet.
+            Discover the gap between your intention and actual use.
           </h1>
           <p className="max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-            Dijital alışkanlıklarını fark et, odaklanmanı artır ve zamanını daha
-            bilinçli yönet.
+            Notice your digital habits, strengthen your focus, and use your time
+            more intentionally.
           </p>
           <Link
             href="/yeni-kayit"
@@ -35,7 +35,7 @@ export default function DashboardPage() {
             )}
           >
             <Plus data-icon="inline-start" />
-            Yeni Kayıt Oluştur
+            Create New Record
           </Link>
         </section>
 
@@ -47,17 +47,17 @@ export default function DashboardPage() {
               <Brain className="size-5" aria-hidden="true" />
             </span>
             <div>
-              <h2 className="font-semibold text-secondary-foreground">Küçük bir hatırlatma</h2>
+              <h2 className="font-semibold text-secondary-foreground">A gentle reminder</h2>
               <p className="mt-1 max-w-2xl text-sm leading-6 text-secondary-foreground/80">
-                Amaç kusursuz olmak değil; hangi anlarda niyetinden uzaklaştığını
-                fark etmek.
+                The goal is not perfection; it is noticing when you move away from
+                your intention.
               </p>
             </div>
           </div>
         </section>
       </main>
 
-      <MobileNav activePage="Ana Sayfa" />
+      <MobileNav activePage="Home" />
     </div>
   );
 }

@@ -1,12 +1,10 @@
 export const mockAnalysis = {
-  intention: 'Ders için araştırma yapmak',
+  intention: 'Research a topic for class',
   plannedMinutes: 10,
   actualMinutes: 38,
   unintendedMinutes: 28,
-  pattern:
-    'Ders sonrası telefon kullanımlarında sosyal medyaya geçiş tekrar ediyor.',
-  possibleTrigger:
-    'Uzun süre ders çalıştıktan sonra zihinsel dinlenme ve mola ihtiyacı.',
+  pattern: 'Switching to social media repeatedly appears after study sessions.',
+  possibleTrigger: 'A need for mental rest after a long period of studying.',
   behaviorExperiment:
-    'Bir sonraki ders molanda önce 5 dakikalık ekransız mola vermeyi dene. Bu, zihninin doğal olarak dinlenmesine alan açabilir.',
+    'During your next study break, try taking five screen-free minutes first. This may give your mind room to rest naturally.',
 } as const;

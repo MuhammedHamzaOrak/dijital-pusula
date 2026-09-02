@@ -57,11 +57,11 @@ export function ActivityCard({
       <CardContent className="px-5">
         <dl className="grid grid-cols-2 gap-3 rounded-xl bg-muted/70 p-3 text-xs">
           <div>
-            <dt className="text-muted-foreground">Niyet</dt>
+            <dt className="text-muted-foreground">Intended</dt>
             <dd className="mt-1 font-semibold text-foreground">{intended}</dd>
           </div>
           <div className="text-right">
-            <dt className="text-muted-foreground">Gerçekleşen</dt>
+            <dt className="text-muted-foreground">Actual</dt>
             <dd className={`mt-1 font-semibold ${styles.actual}`}>{actual}</dd>
           </div>
         </dl>

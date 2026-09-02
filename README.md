@@ -45,7 +45,7 @@ AI servisinin API anahtarı frontend'e veya `NEXT_PUBLIC_` ile başlayan bir de�
 
 ```json
 {
-  "intent": "okul",
+  "intent": "work-or-school",
   "plannedMinutes": 20,
   "previousActivity": "Ders çalışmaya hazırlanıyordum",
   "mood": "Stresli",
@@ -130,7 +130,7 @@ The AI service API key must not be placed in the frontend or in a variable begin
 
 ```json
 {
-  "intent": "okul",
+  "intent": "work-or-school",
   "plannedMinutes": 20,
   "previousActivity": "I was preparing to study",
   "mood": "Stressed",

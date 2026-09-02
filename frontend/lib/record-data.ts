@@ -1,4 +1,4 @@
-export const RECORD_STORAGE_KEY = 'dijital-pusula:last-record';
+export const RECORD_STORAGE_KEY = 'digital-compass:last-record';
 
 export type PhoneUseRecord = {
   intent: string;
@@ -11,11 +11,11 @@ export type PhoneUseRecord = {
 };
 
 export const intentLabels: Record<string, string> = {
-  mesaj: 'Mesajlara bakmak',
-  'sosyal-medya': 'Sosyal medyada gezinmek',
-  okul: 'İş veya okul ile ilgili bir şeyi kontrol etmek',
-  aliskanlik: 'Can sıkıntısı veya otomatik alışkanlık',
-  diger: 'Diğer',
+  messages: 'Check messages',
+  'social-media': 'Browse social media',
+  'work-or-school': 'Check something related to work or school',
+  habit: 'Boredom or an automatic habit',
+  other: 'Other',
 };
 
 export function isPhoneUseRecord(value: unknown): value is PhoneUseRecord {

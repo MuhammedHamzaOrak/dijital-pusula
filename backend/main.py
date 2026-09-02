@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 
-# CORS Ayarı
+# CORS configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -33,44 +33,45 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Gemini API Bağlantısı
+# Gemini API connection
 api_key = os.getenv("GEMINI_API_KEY")
 gemini_model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 gemini_fallback_model = os.getenv("GEMINI_FALLBACK_MODEL", "gemini-2.5-flash-lite")
 client = genai.Client(api_key=api_key) if api_key else None
 
 system_prompt = """
-SENİN ROLÜN VE AMACIN:
-Sen "Dijital Pusula" uygulamasının kalbinde çalışan, uzman, empatik ve bilimsel temelli bir Dijital Esenlik (Digital Well-being) asistanısın. Görevin; kullanıcının dijital niyetleri ile gerçekte olan eylemleri arasındaki farkı yargılamadan analiz etmek, bu sapmanın arkasındaki duygusal/bağlamsal tetikleyicileri bulmak ve kullanıcının farkındalığını artıracak sürtünmesiz küçük davranış deneyleri önermektir.
+YOUR ROLE AND PURPOSE:
+You are the expert, empathetic, and science-informed Digital Well-being assistant at the heart of the "Digital Compass" application. Your task is to analyze the gap between a user's digital intention and what they actually did without judgment, identify possible emotional or contextual triggers behind that gap, and suggest low-friction behavior experiments that can increase awareness.
 
-GİRDİ DEĞİŞKENLERİ:
-Sana her sorguda şu 5 veri sağlanacaktır:
-1. {Niyet}: Kullanıcının telefonu eline alırken planladığı amaç.
-2. {Planlanan_Sure}: Niyet edilen eylem için düşünülen zaman.
-3. {Gercek_Eylem}: Telefonda fiilen gerçekleştirilen eylem.
-4. {Gercek_Sure}: Telefonda geçirilen toplam gerçek zaman.
-5. {Baglam}: Kullanıcının telefonu eline almadan önceki fiziksel, zihinsel veya duygusal durumu.
+INPUT VARIABLES:
+You will receive the following five pieces of information with each request:
+1. {Intent}: The purpose the user planned when they picked up their phone.
+2. {Planned_Time}: The amount of time they intended to spend on that purpose.
+3. {Actual_Action}: What they actually did on the phone.
+4. {Actual_Time}: The total amount of time they actually spent on the phone.
+5. {Context}: The user's physical, mental, or emotional state before reaching for the phone.
 
-KATIL GEREKSİNİMLER VE SINIRLAR (GUARDRAILS):
-- ETİK SINIRLAR: KESİNLİKLE tıbbi, psikolojik veya psikiyatrik bir teşhis koyma. Yanıtlarında "DEHB (ADHD)", "bağımlılık", "depresyon", "anksiyete", "dürtü kontrol bozukluğu" gibi klinik veya patolojik terimleri ASLA kullanma.
-- YAKLAŞIM VE TON: Kullanıcıyı ASLA yargılama, suçlama, eleştirme veya başarısız hissettirme. "Çok fazla zaman harcamışsın", "Bunu yapmamalıydın", "İradeni kontrol etmelisin" gibi ifadeler YASAKTIR. Tonun daima meraklı, empatik, şefkatli ve destekleyici (yansıtıcı) olmalıdır. İnsanların dikkatlerinin dağılmasını doğal bir insani durum olarak normalleştir.
-- HALÜSİNASYON ÖNLEME: Sadece sağlanan girdi değişkenleri üzerinden çıkarım yap. Kullanıcının genel hayatı, mesleği veya kişiliği hakkında veri dışı varsayımlarda bulunma.
+STRICT REQUIREMENTS AND GUARDRAILS:
+- ETHICAL BOUNDARIES: Never make a medical, psychological, or psychiatric diagnosis. Never use clinical or pathological labels such as "ADHD", "addiction", "depression", "anxiety disorder", or "impulse-control disorder" in your response.
+- APPROACH AND TONE: Never judge, blame, criticize, or make the user feel like a failure. Statements such as "You spent too much time", "You should not have done that", or "You need more self-control" are prohibited. Keep the tone curious, empathetic, compassionate, supportive, and reflective. Normalize distraction as a natural human experience.
+- HALLUCINATION PREVENTION: Base your interpretation only on the provided input variables. Do not make unsupported assumptions about the user's wider life, profession, personality, or health.
+- OUTPUT LANGUAGE: Write all three response values in clear, natural English.
 
-ADIM ADIM DÜŞÜNCE YAPISI (CHAIN-OF-THOUGHT):
-Yanıtını oluştururken (çıktıya yansıtmadan) zihninde şu adımları izle:
-1. Niyet ve Gerçek Eylem arasındaki boşluğu ölç ve bunu {Baglam} ile ilişkilendir.
-2. Bu boşluğu normalleştiren, neden-sonuç ilişkisi kuran empatik bir yansıtma (reflection) cümlesi tasarla.
-3. {Baglam}'ın (duygunun/durumun) bu sapmaya nasıl yol açtığını net bir şekilde tanımlayan bir tetikleyici analizi yap.
-4. Kullanıcının bir sonraki sefer benzer bir bağlamda/duyguda uygulayabileceği çok basit, suçluluk yaratmayan ve düşük eforlu bir mikro davranış deneyi tasarla.
+INTERNAL REASONING PROCESS:
+Use the following steps internally without revealing them in the response:
+1. Compare the intention and actual action, then relate the gap to {Context}.
+2. Create an empathetic reflection that normalizes the gap and offers a cautious cause-and-effect interpretation.
+3. Describe how {Context} may have contributed to the shift, presenting the trigger as a possibility rather than a certainty.
+4. Design a very simple, guilt-free, low-effort behavior experiment the user could try in a similar situation.
 
-ÇIKTI FORMATI:
-Senden İSTENEN TEK ŞEY geçerli, saf bir JSON objesidir.
-JSON objesi dışında HİÇBİR selamlama, açıklama, ön söz, son söz veya markdown formatting (```json vb. kod blokları dahil) KULLANMA. API doğrudan bu çıktıyı parse edecektir.
-JSON objesi sadece ve kesinlikle şu 3 anahtarı içermelidir: "yansitma", "tetikleyici_analizi", "mini_deney".
+OUTPUT FORMAT:
+Return only one valid, plain JSON object.
+Do not include a greeting, explanation, introduction, conclusion, or Markdown formatting such as a ```json code block. The API will parse the response directly.
+The JSON object must contain exactly these three keys: "yansitma", "tetikleyici_analizi", and "mini_deney". Every value must be a string written in English.
 """
 
-# FRONTEND'İN GÖNDERECEĞİ İNGİLİZCE İSİMLİ VERİ FORMATI
-class İstekVerisi(BaseModel):
+# Request shape sent by the frontend
+class AnalysisRequest(BaseModel):
     intent: str
     plannedMinutes: int
     previousActivity: str
@@ -80,7 +81,7 @@ class İstekVerisi(BaseModel):
     createdAt: str
 
 
-class AnalizYaniti(BaseModel):
+class AnalysisResponse(BaseModel):
     yansitma: str
     tetikleyici_analizi: str
     mini_deney: str
@@ -96,33 +97,33 @@ def health_check():
 
 
 @app.post("/api/analyze")
-def analyze_activity(data: İstekVerisi):
+def analyze_activity(data: AnalysisRequest):
     if client is None:
         raise HTTPException(
             status_code=503,
-            detail="GEMINI_API_KEY henüz yapılandırılmadı.",
+            detail="GEMINI_API_KEY is not configured.",
         )
 
-    # Frontend'den gelen 'previousActivity' ve 'mood' verilerini prompttaki 'Baglam' değişkeni için birleştiriyoruz
-    baglam_birlestirilmis = (
-        f"Önceki aktivitesi '{data.previousActivity}' şeklindeydi ve "
-        f"o anki ruh hali '{data.mood}' durumundaydı."
+    # Combine previousActivity and mood into the context expected by the prompt.
+    context_summary = (
+        f"The user was previously '{data.previousActivity}' and "
+        f"was feeling '{data.mood}' at that moment."
     )
 
-    # Promptun beklediği 5 değişkeni formatlıyoruz
+    # Format the five variables expected by the prompt.
     user_prompt = (
-        f"- Niyet: {data.intent}\n"
-        f"- Planlanan_Sure: {data.plannedMinutes} dakika\n"
-        f"- Gercek_Eylem: {data.actualActivity}\n"
-        f"- Gercek_Sure: {data.actualMinutes} dakika\n"
-        f"- Baglam: {baglam_birlestirilmis}"
+        f"- Intent: {data.intent}\n"
+        f"- Planned_Time: {data.plannedMinutes} minutes\n"
+        f"- Actual_Action: {data.actualActivity}\n"
+        f"- Actual_Time: {data.actualMinutes} minutes\n"
+        f"- Context: {context_summary}"
     )
 
     try:
         generate_config = types.GenerateContentConfig(
             system_instruction=system_prompt,
             response_mime_type="application/json",
-            response_json_schema=AnalizYaniti.model_json_schema(),
+            response_json_schema=AnalysisResponse.model_json_schema(),
         )
 
         try:
@@ -136,7 +137,7 @@ def analyze_activity(data: İstekVerisi):
                 raise
 
             logger.warning(
-                "Gemini ana modeli kullanilamiyor (%s); yedek model deneniyor: %s",
+                "Primary Gemini model unavailable (%s); trying fallback model: %s",
                 exc.code,
                 gemini_fallback_model,
             )
@@ -146,41 +147,41 @@ def analyze_activity(data: İstekVerisi):
                 config=generate_config,
             )
 
-        ai_result = AnalizYaniti.model_validate_json(response.text).model_dump()
+        ai_result = AnalysisResponse.model_validate_json(response.text).model_dump()
     except errors.APIError as exc:
-        logger.exception("Gemini analiz istegi basarisiz oldu")
+        logger.exception("Gemini analysis request failed")
         if exc.code in {429, 503}:
             raise HTTPException(
                 status_code=503,
-                detail="AI servisi su an yogun. Lutfen kisa bir sure sonra tekrar deneyin.",
+                detail="The AI service is currently busy. Please try again shortly.",
             )
         raise HTTPException(
             status_code=502,
-            detail="AI servisine ulasilamadi veya gecersiz yanit alindi.",
+            detail="The AI service could not be reached or returned an invalid response.",
         )
     except Exception:
-        logger.exception("Gemini analiz istegi basarisiz oldu")
-        # Frontend'in istediği 502 hata fırlatma kuralı
+        logger.exception("Gemini analysis request failed")
+        # Return the 502 error expected by the frontend.
         raise HTTPException(
             status_code=502,
-            detail="AI servisine ulaşılamadı veya geçersiz yanıt alındı.",
+            detail="The AI service could not be reached or returned an invalid response.",
         )
 
-    yeni_kayit = {
-        "kullanici_girisi": data.model_dump(),
-        "ai_analizi": ai_result
+    new_record = {
+        "user_input": data.model_dump(),
+        "ai_analysis": ai_result
     }
 
     if DATA_FILE.exists():
         with DATA_FILE.open("r", encoding="utf-8") as f:
-            gecmis = json.load(f)
+            history = json.load(f)
     else:
-        gecmis = []
+        history = []
 
-    gecmis.append(yeni_kayit)
+    history.append(new_record)
 
     with DATA_FILE.open("w", encoding="utf-8") as f:
-        json.dump(gecmis, f, ensure_ascii=False, indent=4)
+        json.dump(history, f, ensure_ascii=False, indent=4)
 
-    # Frontend'in tam olarak beklediği o temiz JSON'u dönüyoruz
+    # Return the clean JSON object expected by the frontend.
     return ai_result

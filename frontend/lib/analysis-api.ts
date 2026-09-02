@@ -48,7 +48,7 @@ export async function requestAnalysis(
   const apiUrl = process.env.NEXT_PUBLIC_ANALYZE_API_URL?.trim();
 
   if (!apiUrl) {
-    throw new AnalysisApiError(0, 'Analiz servisi adresi yapılandırılmadı.');
+    throw new AnalysisApiError(0, 'The analysis service URL is not configured.');
   }
 
   const response = await fetch(apiUrl, {
@@ -59,7 +59,7 @@ export async function requestAnalysis(
   });
 
   if (!response.ok) {
-    let message = `Analiz isteği başarısız oldu (${response.status}).`;
+    let message = `The analysis request failed (${response.status}).`;
 
     try {
       const errorPayload: unknown = await response.json();
@@ -71,7 +71,7 @@ export async function requestAnalysis(
         message = (errorPayload as { detail: string }).detail;
       }
     } catch {
-      // Sunucu JSON hata gövdesi döndürmediyse durum kodunu kullan.
+      // Use the status code when the server does not return a JSON error body.
     }
 
     throw new AnalysisApiError(response.status, message);
@@ -81,7 +81,7 @@ export async function requestAnalysis(
   const normalizedPayload = normalizeResponse(payload);
 
   if (!isAnalysisResponse(normalizedPayload)) {
-    throw new Error('Analiz servisi beklenen veri biçimini döndürmedi.');
+    throw new Error('The analysis service returned an unexpected data format.');
   }
 
   return normalizedPayload;

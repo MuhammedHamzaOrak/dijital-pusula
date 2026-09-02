@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Dijital Pusula',
+  title: 'Digital Compass',
   description:
-    'Niyetinle gerçek telefon kullanımın arasındaki farkı görünür hâle getiren dijital iyi oluş aracı.',
+    'A digital well-being tool that makes the gap between your intention and actual phone use visible.',
 };
 
 export default function RootLayout({
@@ -13,7 +13,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="tr">
+    <html lang="en">
       <body>{children}</body>
     </html>
   );

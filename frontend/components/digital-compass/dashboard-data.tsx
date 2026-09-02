@@ -34,9 +34,9 @@ function getStoredRecord() {
 
 function formatRecordDate(createdAt: string) {
   const date = new Date(createdAt);
-  if (Number.isNaN(date.getTime())) return 'Son kayıt';
+  if (Number.isNaN(date.getTime())) return 'Latest record';
 
-  return new Intl.DateTimeFormat('tr-TR', {
+  return new Intl.DateTimeFormat('en-US', {
     day: 'numeric',
     month: 'long',
     hour: '2-digit',
@@ -61,7 +61,7 @@ export function DashboardData() {
     return (
       <Card className="min-h-52 animate-pulse border-0 bg-card shadow-sm ring-1 ring-border">
         <CardContent className="flex min-h-52 items-center justify-center text-sm text-muted-foreground">
-          Kayıtların hazırlanıyor...
+          Preparing your records...
         </CardContent>
       </Card>
     );
@@ -74,16 +74,16 @@ export function DashboardData() {
           <span className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <Brain className="size-7" aria-hidden="true" />
           </span>
-          <CardTitle className="mt-5 text-2xl font-semibold">Henüz bir kaydın yok</CardTitle>
+          <CardTitle className="mt-5 text-2xl font-semibold">You do not have any records yet</CardTitle>
           <CardDescription className="mt-2 max-w-md text-base leading-6">
-            İlk niyetini ve gerçekleşen kullanımını kaydederek farkındalık yolculuğuna başla.
+            Start building awareness by recording your first intention and actual use.
           </CardDescription>
           <Link
             href="/yeni-kayit"
             className={cn(buttonVariants({ size: 'lg' }), 'mt-6 h-11 rounded-xl px-5')}
           >
             <Plus data-icon="inline-start" />
-            İlk Kaydı Oluştur
+            Create Your First Record
           </Link>
         </CardContent>
       </Card>
@@ -100,24 +100,24 @@ export function DashboardData() {
 
   return (
     <>
-      <section className="grid gap-5 md:grid-cols-12" aria-label="Son kayıt özeti">
+      <section className="grid gap-5 md:grid-cols-12" aria-label="Latest record summary">
         <Card className="border-0 bg-card py-0 shadow-[0_12px_32px_rgb(55_98_130/8%)] ring-1 ring-border md:col-span-4">
           <CardHeader className="px-6 pt-6">
-            <CardDescription className="font-medium">Son kaydındaki süre farkı</CardDescription>
+            <CardDescription className="font-medium">Time difference in your latest record</CardDescription>
             <CardTitle className="mt-2 flex items-baseline gap-2">
               <span className={`text-4xl font-bold tracking-tight ${stayedWithinPlan ? 'text-primary' : 'text-destructive'}`}>
-                {stayedWithinPlan ? `${Math.abs(difference)} dk` : `+${difference} dk`}
+                {stayedWithinPlan ? `${Math.abs(difference)} min` : `+${difference} min`}
               </span>
             </CardTitle>
           </CardHeader>
           <CardContent className="mt-auto px-6 pb-6">
             <Progress
-              aria-label={`Niyete sadakat yüzde ${adherence}`}
+              aria-label={`${adherence} percent adherence to your intention`}
               value={adherence}
               className="[&_[data-slot=progress-indicator]]:bg-primary [&_[data-slot=progress-track]]:h-2"
             />
             <p className="mt-3 text-xs font-medium text-muted-foreground">
-              {record.plannedMinutes} dk planlandı, {record.actualMinutes} dk gerçekleşti.
+              {record.plannedMinutes} min planned, {record.actualMinutes} min actual.
             </p>
           </CardContent>
         </Card>
@@ -130,21 +130,21 @@ export function DashboardData() {
                 <Target className="size-7" aria-hidden="true" />
               </span>
               <CardTitle className="text-2xl font-semibold text-accent-foreground">
-                Niyetine %{adherence} sadık kaldın
+                You stayed {adherence}% aligned with your intention
               </CardTitle>
               <CardDescription className="mt-2 text-base leading-6">
-                {intention} · O an kendini {record.mood.toLocaleLowerCase('tr-TR')} hissediyordun.
+                {intention} · You were feeling {record.mood.toLocaleLowerCase('en-US')} at that moment.
               </CardDescription>
             </div>
           </CardContent>
         </Card>
       </section>
 
-      <section id="son-aktiviteler" aria-labelledby="activities-title">
+      <section id="recent-activities" aria-labelledby="activities-title">
         <div className="mb-5">
-          <p className="text-sm font-medium text-primary">Kayıtların</p>
+          <p className="text-sm font-medium text-primary">Your records</p>
           <h2 id="activities-title" className="mt-1 text-2xl font-semibold tracking-tight">
-            Son Aktivite
+            Latest Activity
           </h2>
         </div>
 
@@ -152,9 +152,9 @@ export function DashboardData() {
           <ActivityCard
             title={intention}
             time={formatRecordDate(record.createdAt)}
-            status={stayedWithinPlan ? 'Plan içinde' : 'Aşıldı'}
-            intended={`${record.plannedMinutes} dk`}
-            actual={`${record.actualMinutes} dk`}
+            status={stayedWithinPlan ? 'Within plan' : 'Exceeded'}
+            intended={`${record.plannedMinutes} min`}
+            actual={`${record.actualMinutes} min`}
             tone={stayedWithinPlan ? 'success' : 'danger'}
             icon={Smartphone}
           />

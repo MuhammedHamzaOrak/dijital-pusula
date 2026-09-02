@@ -1,34 +1,34 @@
 [
   {
-    "kullanici_girisi": {
-      "intent": "Spotify'dan odaklanma müzik listesi açma",
+    "user_input": {
+      "intent": "Open a Spotify focus playlist",
       "plannedMinutes": 5,
-      "previousActivity": "Ders çalışmaya hazırlanıyordum",
-      "mood": "Sakin",
-      "actualActivity": "Müzik listesini seçip ekranı kapatma",
+      "previousActivity": "I was getting ready to study",
+      "mood": "Calm",
+      "actualActivity": "I selected the playlist and put the phone away",
       "actualMinutes": 5,
       "createdAt": "2026-08-25T14:00:00.000Z"
     },
-    "ai_analizi": {
-      "yansitma": "Harika bir dijital niyet kontrolü! Zihninin o anki sakinliğini koruyarak planladığın gibi sadece müziği açıp ekrandan uzaklaşabilmen çok değerli.",
-      "tetikleyici_analizi": "Sakin ruh hali ve net bir hedef (ders çalışmaya hazırlık), dijital ortamda kaybolmadan sadece ihtiyacın olanı almanı sağlamış.",
-      "mini_deney": "Bir sonraki çalışmanda da telefonu biraz daha uzağa koyarak bu odaklanma halini desteklemeyi deneyebilirsin."
+    "ai_analysis": {
+      "yansitma": "You had a clear digital intention and followed it by choosing your music and putting the phone away. That alignment shows how a calm moment and a specific goal can make focused phone use feel more natural.",
+      "tetikleyici_analizi": "Your calm mood and clear study-related goal may have helped you use the phone only for what you needed.",
+      "mini_deney": "During your next study session, try placing the phone slightly farther away after starting the playlist and notice whether that supports the same focused pattern."
     }
   },
   {
-    "kullanici_girisi": {
-      "intent": "Makale okuması için sözlükten kelime çevirisine bakma",
+    "user_input": {
+      "intent": "Look up a word while reading an academic article",
       "plannedMinutes": 10,
-      "previousActivity": "Akademik okuma yapıyordum",
-      "mood": "Bunalmış",
-      "actualActivity": "Çeviri uygulamasından sonra YouTube Shorts'a dalma",
+      "previousActivity": "I was reading an academic article",
+      "mood": "Overwhelmed",
+      "actualActivity": "I opened YouTube Shorts after using the translation app",
       "actualMinutes": 55,
       "createdAt": "2026-08-27T16:30:00.000Z"
     },
-    "ai_analizi": {
-      "yansitma": "Akademik bir metnin getirdiği o bunalma hissiyle başa çıkmak için zihninin daha kolay tüketilebilir bir şeye (Shorts) yönelmesi çok insani bir mola arayışı.",
-      "tetikleyici_analizi": "Ağır bilişsel yük ve bunalma hissi, beyni hızlı dopamin ve pasif rahatlama sunan kısa videolara doğru çekmiş.",
-      "mini_deney": "Bir dahaki sefere okuma sırasında bunaldığını hissettiğinde, ekrana bakmak yerine 2 dakika gözlerini kapatıp derin nefes alarak zihnine efor gerektirmeyen bir dinlenme fırsatı verebilirsin."
+    "ai_analysis": {
+      "yansitma": "Feeling overwhelmed by a demanding text can make lighter, faster content feel like an understandable form of relief. Moving from the translation app to Shorts may have been your mind's way of looking for an easier pause.",
+      "tetikleyici_analizi": "The mental effort of academic reading and the feeling of being overwhelmed may have made quick, passive content especially appealing in that moment.",
+      "mini_deney": "The next time reading starts to feel overwhelming, try closing your eyes and taking a two-minute screen-free pause before opening another app, then notice what your mind needs."
     }
   }
 ]

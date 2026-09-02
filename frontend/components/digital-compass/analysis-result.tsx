@@ -32,7 +32,7 @@ import { cn } from '@/lib/utils';
 
 type AnalysisStatus = 'loading' | 'empty' | 'success' | 'busy' | 'error';
 
-const ANALYSIS_STORAGE_KEY = 'dijital-pusula:last-analysis';
+const ANALYSIS_STORAGE_KEY = 'digital-compass:last-analysis';
 const inFlightAnalysisRequests = new Map<string, Promise<AnalysisResponse>>();
 
 type StoredAnalysis = {
@@ -69,7 +69,7 @@ function storeAnalysis(record: PhoneUseRecord, analysis: AnalysisResponse) {
     };
     sessionStorage.setItem(ANALYSIS_STORAGE_KEY, JSON.stringify(value));
   } catch {
-    // Tarayıcı depolaması kapalıysa analiz yine ekranda gösterilir.
+    // The analysis still appears on screen when browser storage is unavailable.
   }
 }
 
@@ -107,27 +107,34 @@ export function AnalysisResult() {
     const storedRecord = readStoredRecord();
 
     if (!storedRecord) {
-      setRecord(null);
-      setAnalysis(null);
-      setStatus('empty');
-      return;
+      const emptyStateTimer = window.setTimeout(() => {
+        setRecord(null);
+        setAnalysis(null);
+        setStatus('empty');
+      }, 0);
+
+      return () => window.clearTimeout(emptyStateTimer);
     }
 
-    const storedAnalysis = readStoredAnalysis(storedRecord);
+    const activeRecord: PhoneUseRecord = storedRecord;
+    const storedAnalysis = readStoredAnalysis(activeRecord);
     if (storedAnalysis) {
-      setRecord(storedRecord);
-      setAnalysis(storedAnalysis);
-      setStatus('success');
-      return;
+      const cachedStateTimer = window.setTimeout(() => {
+        setRecord(activeRecord);
+        setAnalysis(storedAnalysis);
+        setStatus('success');
+      }, 0);
+
+      return () => window.clearTimeout(cachedStateTimer);
     }
 
     async function loadAnalysis() {
       try {
-        const result = await requestAnalysisOnce(storedRecord);
-        storeAnalysis(storedRecord, result);
+        const result = await requestAnalysisOnce(activeRecord);
+        storeAnalysis(activeRecord, result);
         if (isCancelled) return;
 
-        setRecord(storedRecord);
+        setRecord(activeRecord);
         setAnalysis(result);
         setStatus('success');
       } catch (error) {
@@ -154,15 +161,15 @@ export function AnalysisResult() {
           <span className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <Sparkles className="size-7" aria-hidden="true" />
           </span>
-          <CardTitle className="mt-5 text-2xl font-semibold">Henüz bir içgörün yok</CardTitle>
+          <CardTitle className="mt-5 text-2xl font-semibold">You do not have any insights yet</CardTitle>
           <p className="mt-2 max-w-md text-base leading-6 text-muted-foreground">
-            İlk kaydını oluşturduğunda niyetin ve gerçek kullanımın burada analiz edilecek.
+            Once you create your first record, your intention and actual use will be analyzed here.
           </p>
           <Link
             href="/yeni-kayit"
             className={cn(buttonVariants({ size: 'lg' }), 'mt-6 h-11 rounded-xl px-5')}
           >
-            İlk Kaydı Oluştur
+            Create Your First Record
             <ArrowRight data-icon="inline-end" />
           </Link>
         </CardContent>
@@ -180,12 +187,12 @@ export function AnalysisResult() {
             <TriangleAlert className="size-7" aria-hidden="true" />
           </span>
           <h1 className="mt-5 text-2xl font-bold tracking-tight">
-            {isBusy ? 'AI servisi şu an yoğun' : 'Analiz alınamadı'}
+            {isBusy ? 'The AI service is busy' : 'Analysis unavailable'}
           </h1>
           <p className="mt-2 max-w-md text-muted-foreground">
             {isBusy
-              ? 'Kısa bir süre bekleyip tekrar deneyebilirsin. Kaydın bu cihazda duruyor.'
-              : 'Bağlantıda kısa süreli bir sorun oluştu. Kaydın bu cihazda duruyor.'}
+              ? 'Please wait a moment and try again. Your record is saved on this device.'
+              : 'A temporary connection issue occurred. Your record is saved on this device.'}
           </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Button
@@ -195,13 +202,13 @@ export function AnalysisResult() {
                 setRetryCount((count) => count + 1);
               }}
             >
-              Tekrar Dene
+              Try Again
             </Button>
             <Link
               href="/yeni-kayit"
               className={cn(buttonVariants({ variant: 'outline' }), 'rounded-xl')}
             >
-              Kaydı Düzenle
+              Edit Record
             </Link>
           </div>
         </div>
@@ -213,9 +220,9 @@ export function AnalysisResult() {
         <span className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
           <LoaderCircle className="size-7 animate-spin" aria-hidden="true" />
         </span>
-        <h1 className="mt-5 text-2xl font-bold tracking-tight">Kaydın analiz ediliyor</h1>
+        <h1 className="mt-5 text-2xl font-bold tracking-tight">Analyzing your record</h1>
         <p className="mt-2 max-w-md text-muted-foreground">
-          Planladığın kullanım ile gerçekleşen durumu karşılaştırıyoruz.
+          We are comparing your planned use with what actually happened.
         </p>
       </div>
     );
@@ -232,47 +239,47 @@ export function AnalysisResult() {
     <>
       <header>
         <div className="flex flex-wrap items-center gap-3">
-          <p className="text-sm font-semibold tracking-wide text-primary">Son kaydının özeti</p>
-          <Badge variant="outline">AI analizi</Badge>
+          <p className="text-sm font-semibold tracking-wide text-primary">Your latest record</p>
+          <Badge variant="outline">AI analysis</Badge>
         </div>
         <h1 className="mt-2 text-3xl font-bold tracking-[-0.025em] sm:text-4xl">
-          Analiz Sonucu
+          Analysis Result
         </h1>
         <p className="mt-3 text-base leading-7 text-muted-foreground">
-          Son oturumuna dair yansımalar ve farkındalıklar.
+          Reflections and insights from your latest session.
         </p>
       </header>
 
-      <section className="grid gap-5 md:grid-cols-2" aria-label="Kullanım analizi kartları">
+      <section className="grid gap-5 md:grid-cols-2" aria-label="Usage analysis cards">
         <Card className="border-0 bg-card py-0 shadow-[0_12px_34px_rgb(55_98_130/8%)] ring-1 ring-border md:col-span-2">
           <CardHeader className="flex flex-row items-center gap-3 px-6 pt-6">
             <span className="flex size-11 items-center justify-center rounded-xl bg-accent text-accent-foreground">
               <RefreshCw className="size-5" aria-hidden="true" />
             </span>
             <div>
-              <CardTitle className="text-xl font-semibold">Niyet ve Gerçeklik</CardTitle>
+              <CardTitle className="text-xl font-semibold">Intention vs. Reality</CardTitle>
               <p className="mt-0.5 text-sm text-muted-foreground">
-                Planladığın süre ile gerçek kullanımının karşılaştırması
+                A comparison of your planned time and actual use
               </p>
             </div>
           </CardHeader>
           <CardContent className="px-6 pb-7">
             <Badge variant="outline" className="mb-6 h-auto max-w-full whitespace-normal px-3 py-2 text-sm">
-              Niyet: {intention}
+              Intention: {intention}
             </Badge>
 
             <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
               <div>
                 <div className="mb-3 flex items-end justify-between gap-4 text-sm">
                   <p className="text-muted-foreground">
-                    Planlanan: <strong className="text-foreground">{record.plannedMinutes} dk</strong>
+                    Planned: <strong className="text-foreground">{record.plannedMinutes} min</strong>
                   </p>
                   <p className="text-right text-muted-foreground">
-                    Gerçek: <strong className="text-foreground">{record.actualMinutes} dk</strong>
+                    Actual: <strong className="text-foreground">{record.actualMinutes} min</strong>
                   </p>
                 </div>
                 <p className="sr-only">
-                  {record.plannedMinutes} dakika planlandı, {record.actualMinutes} dakika kullanıldı.
+                  {record.plannedMinutes} minutes planned, {record.actualMinutes} minutes used.
                 </p>
                 <div className="flex h-4 overflow-hidden rounded-full bg-muted" aria-hidden="true">
                   <div className="h-full bg-primary" style={{ width: `${plannedRatio}%` }} />
@@ -283,10 +290,10 @@ export function AnalysisResult() {
                 </div>
                 <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-xs text-muted-foreground">
                   <span className="flex items-center gap-1.5">
-                    <span className="size-2 rounded-full bg-primary" /> Planlanan süre
+                    <span className="size-2 rounded-full bg-primary" /> Planned time
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <span className="size-2 rounded-full bg-secondary" /> Niyet dışı kullanım
+                    <span className="size-2 rounded-full bg-secondary" /> Unintended use
                   </span>
                 </div>
               </div>
@@ -295,8 +302,8 @@ export function AnalysisResult() {
                 <Clock3 className="size-4" aria-hidden="true" />
                 <span className="text-sm font-semibold">
                   {unintendedMinutes > 0
-                    ? `+${unintendedMinutes} dk niyet dışı kullanım`
-                    : 'Planlanan süre içinde kaldın'}
+                    ? `+${unintendedMinutes} min of unintended use`
+                    : 'You stayed within your planned time'}
                 </span>
               </div>
             </div>
@@ -305,32 +312,32 @@ export function AnalysisResult() {
 
         <Card className="border-0 bg-card py-0 shadow-[0_12px_34px_rgb(55_98_130/8%)] ring-1 ring-border md:col-span-2">
           <CardHeader className="px-6 pt-6">
-            <CardTitle className="text-lg font-semibold">Bu kayıtta neler vardı?</CardTitle>
+            <CardTitle className="text-lg font-semibold">What shaped this record?</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 px-6 pb-6 sm:grid-cols-3">
             <div className="rounded-xl bg-muted/60 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Öncesinde</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Before</p>
               <p className="mt-1.5 text-sm leading-6">{record.previousActivity}</p>
             </div>
             <div className="rounded-xl bg-muted/60 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Duygu</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Mood</p>
               <p className="mt-1.5 text-sm leading-6">{record.mood}</p>
             </div>
             <div className="rounded-xl bg-muted/60 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Gerçekte</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Actual use</p>
               <p className="mt-1.5 text-sm leading-6">{record.actualActivity}</p>
             </div>
           </CardContent>
         </Card>
 
         <InsightCard
-          title="Yansıtma"
+          title="Reflection"
           description={analysis.yansitma}
           icon={RefreshCw}
           tone="primary"
         />
         <InsightCard
-          title="Olası Tetikleyici"
+          title="Possible Trigger"
           description={analysis.tetikleyici_analizi}
           icon={Sparkles}
           tone="secondary"
@@ -343,7 +350,7 @@ export function AnalysisResult() {
               <Lightbulb className="size-6" aria-hidden="true" />
             </span>
             <div>
-              <CardTitle className="text-xl font-semibold">Küçük Davranış Deneyi</CardTitle>
+              <CardTitle className="text-xl font-semibold">Small Behavior Experiment</CardTitle>
               <p className="mt-2 text-base leading-7 text-accent-foreground/85 sm:text-lg">
                 {analysis.mini_deney}
               </p>
@@ -357,13 +364,13 @@ export function AnalysisResult() {
           href="/"
           className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'h-11 rounded-xl px-5')}
         >
-          Ana Sayfaya Dön
+          Back to Home
         </Link>
         <Link
           href="/yeni-kayit"
           className={cn(buttonVariants({ size: 'lg' }), 'h-11 rounded-xl px-5')}
         >
-          Yeni Kayıt Oluştur
+          Create New Record
           <ArrowRight data-icon="inline-end" />
         </Link>
       </div>

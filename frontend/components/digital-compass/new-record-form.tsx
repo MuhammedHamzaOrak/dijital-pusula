@@ -18,17 +18,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { RECORD_STORAGE_KEY, type PhoneUseRecord } from '@/lib/record-data';
 
 const moods = [
-  { emoji: '😌', label: 'Sakin' },
-  { emoji: '🥱', label: 'Yorgun' },
-  { emoji: '😟', label: 'Stresli' },
-  { emoji: '😫', label: 'Bunalmış' },
+  { emoji: '😌', label: 'Calm' },
+  { emoji: '🥱', label: 'Tired' },
+  { emoji: '😟', label: 'Stressed' },
+  { emoji: '😫', label: 'Overwhelmed' },
 ] as const;
 
 export function NewRecordForm() {
   const router = useRouter();
   const [plannedTime, setPlannedTime] = useState(15);
   const [actualTime, setActualTime] = useState(30);
-  const [mood, setMood] = useState<(typeof moods)[number]['label']>('Sakin');
+  const [mood, setMood] = useState<(typeof moods)[number]['label']>('Calm');
 
   function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -59,36 +59,36 @@ export function NewRecordForm() {
             <Brain className="size-5" aria-hidden="true" />
           </span>
           <div>
-            <CardTitle className="text-xl font-semibold">Başlangıç Niyeti</CardTitle>
-            <p className="mt-0.5 text-sm text-muted-foreground">Telefonu açmadan önceki planın</p>
+            <CardTitle className="text-xl font-semibold">Initial Intention</CardTitle>
+            <p className="mt-0.5 text-sm text-muted-foreground">Your plan before opening your phone</p>
           </div>
         </CardHeader>
         <CardContent className="px-6 py-6">
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="intent">Telefonu neden açıyorsun?</FieldLabel>
+              <FieldLabel htmlFor="intent">Why are you opening your phone?</FieldLabel>
               <NativeSelect id="intent" name="intent" required defaultValue="" className="w-full">
                 <NativeSelectOption value="" disabled>
-                  Seçiniz...
+                  Select an option...
                 </NativeSelectOption>
-                <NativeSelectOption value="mesaj">Mesajlara bakmak</NativeSelectOption>
-                <NativeSelectOption value="sosyal-medya">Sosyal medyada gezinmek</NativeSelectOption>
-                <NativeSelectOption value="okul">İş veya okul ile ilgili bir şeyi kontrol etmek</NativeSelectOption>
-                <NativeSelectOption value="aliskanlik">Can sıkıntısı veya otomatik alışkanlık</NativeSelectOption>
-                <NativeSelectOption value="diger">Diğer</NativeSelectOption>
+                <NativeSelectOption value="messages">Check messages</NativeSelectOption>
+                <NativeSelectOption value="social-media">Browse social media</NativeSelectOption>
+                <NativeSelectOption value="work-or-school">Check something related to work or school</NativeSelectOption>
+                <NativeSelectOption value="habit">Boredom or an automatic habit</NativeSelectOption>
+                <NativeSelectOption value="other">Other</NativeSelectOption>
               </NativeSelect>
             </Field>
 
             <Field>
               <div className="flex items-center justify-between gap-4">
-                <FieldLabel htmlFor="planned-time">Planladığın kullanım süresi</FieldLabel>
+                <FieldLabel htmlFor="planned-time">Planned usage time</FieldLabel>
                 <output className="min-w-16 text-right text-sm font-semibold text-primary">
-                  {plannedTime} dk
+                  {plannedTime} min
                 </output>
               </div>
               <Slider
                 id="planned-time"
-                aria-label="Planlanan kullanım süresi"
+                aria-label="Planned usage time"
                 min={1}
                 max={60}
                 step={1}
@@ -102,20 +102,20 @@ export function NewRecordForm() {
 
             <Field>
               <FieldLabel htmlFor="previous-activity">
-                Telefona yönelmeden önce ne yapıyordun?
+                What were you doing before reaching for your phone?
               </FieldLabel>
               <Input
                 id="previous-activity"
                 name="previousActivity"
-                placeholder="Örn: Ders çalışıyordum, yemek yiyordum..."
+                placeholder="For example: I was studying or having a meal..."
                 className="h-11 bg-muted/60 px-4"
                 required
               />
             </Field>
 
             <Field>
-              <FieldLabel>Nasıl hissediyordun?</FieldLabel>
-              <FieldDescription>O ana en yakın duyguyu seç.</FieldDescription>
+              <FieldLabel>How were you feeling?</FieldLabel>
+              <FieldDescription>Select the feeling closest to that moment.</FieldDescription>
               <div className="flex flex-wrap gap-3">
                 {moods.map((item) => {
                   const selected = mood === item.label;
@@ -149,18 +149,18 @@ export function NewRecordForm() {
             <History className="size-5" aria-hidden="true" />
           </span>
           <div>
-            <CardTitle className="text-xl font-semibold">Gerçekleşen Durum</CardTitle>
-            <p className="mt-0.5 text-sm text-muted-foreground">Telefonu kapattıktan sonraki gerçek</p>
+            <CardTitle className="text-xl font-semibold">What Actually Happened</CardTitle>
+            <p className="mt-0.5 text-sm text-muted-foreground">Your actual use after putting down the phone</p>
           </div>
         </CardHeader>
         <CardContent className="px-6 py-6">
           <FieldGroup>
             <Field>
-              <FieldLabel htmlFor="actual-activity">Gerçekte ne yaptın?</FieldLabel>
+              <FieldLabel htmlFor="actual-activity">What did you actually do?</FieldLabel>
               <Textarea
                 id="actual-activity"
                 name="actualActivity"
-                placeholder="Planladığımdan farklı olarak..."
+                placeholder="Instead of what I had planned..."
                 className="min-h-28 resize-none bg-muted/60 px-4 py-3"
                 required
               />
@@ -168,14 +168,14 @@ export function NewRecordForm() {
 
             <Field>
               <div className="flex items-center justify-between gap-4">
-                <FieldLabel htmlFor="actual-time">Gerçek kullanım süresi</FieldLabel>
+                <FieldLabel htmlFor="actual-time">Actual usage time</FieldLabel>
                 <output className="min-w-16 text-right text-sm font-semibold text-secondary-foreground">
-                  {actualTime} dk
+                  {actualTime} min
                 </output>
               </div>
               <Slider
                 id="actual-time"
-                aria-label="Gerçek kullanım süresi"
+                aria-label="Actual usage time"
                 min={1}
                 max={120}
                 step={1}
@@ -193,7 +193,7 @@ export function NewRecordForm() {
       <div className="flex justify-end pt-1">
         <Button type="submit" size="lg" className="h-11 rounded-xl px-6 shadow-sm">
           <BarChart3 data-icon="inline-start" />
-          Analiz Et
+          Analyze
         </Button>
       </div>
     </form>

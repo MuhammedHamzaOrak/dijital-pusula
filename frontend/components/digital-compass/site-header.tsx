@@ -1,11 +1,11 @@
 import { Compass } from 'lucide-react';
 import Link from 'next/link';
 
-const navItems = ['Ana Sayfa', 'Yeni Kayıt', 'İçgörüler'] as const;
+const navItems = ['Home', 'New Record', 'Insights'] as const;
 const navLinks = {
-  'Ana Sayfa': '/',
-  'Yeni Kayıt': '/yeni-kayit',
-  İçgörüler: '/analiz',
+  Home: '/',
+  'New Record': '/yeni-kayit',
+  Insights: '/analiz',
 } as const;
 
 type SiteHeaderProps = {
@@ -20,10 +20,10 @@ export function SiteHeader({ activePage }: SiteHeaderProps) {
           <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
             <Compass className="size-5" aria-hidden="true" />
           </span>
-          <span className="text-lg font-bold tracking-tight">Dijital Pusula</span>
+          <span className="text-lg font-bold tracking-tight">Digital Compass</span>
         </Link>
 
-        <nav className="hidden items-center gap-7 md:flex" aria-label="Ana menü">
+        <nav className="hidden items-center gap-7 md:flex" aria-label="Main navigation">
           {navItems.map((item) => {
             const active = item === activePage;
             return (
@@ -45,7 +45,7 @@ export function SiteHeader({ activePage }: SiteHeaderProps) {
 
         <span
           className="hidden size-8 items-center justify-center rounded-full bg-accent text-xs font-bold text-accent-foreground md:flex"
-          aria-label="Dijital Pusula"
+          aria-label="Digital Compass"
         >
           DP
         </span>
