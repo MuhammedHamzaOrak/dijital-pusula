@@ -1,4 +1,4 @@
-- [Demo - English](Demo/digital-compass-demo.mp4)
+- [Demo - English](https://github.com/user-attachments/assets/b73988e7-08e7-4909-bc92-69dac5448991)
 - [Demo - Turkish](https://github.com/user-attachments/assets/2ca34cb2-324e-40f1-991a-1a47e3cadc8d)
 # Dijital Pusula
 
